@@ -22,7 +22,7 @@ DECLARE @QuitWithRollback NVARCHAR(MAX) = 'COMMIT TRANSACTION' + CHAR(10) + 'GOT
 
 SET @SQLCommand = @Transaction + @SQLCommand;
 
-CREATE TABLE #JOBCREATION (id int identity(1,1),cmd text);
+CREATE TABLE #JOBCREATION (id int identity(1,1),cmd nvarchar(max));
 
 INSERT INTO #JOBCREATION
 SELECT @SQLCommand;
@@ -65,7 +65,7 @@ SELECT 'EXEC @ReturnCode = msdb.dbo.sp_add_job '
 	+ ', ' + '@notify_level_netsend='	+ CAST(sj.notify_level_netsend AS NVARCHAR(MAX))
 	+ ', ' + '@notify_level_page='		+ CAST(sj.notify_level_page AS NVARCHAR(MAX))
 	+ ', ' + '@delete_level='		+ CAST(sj.delete_level AS NVARCHAR(MAX))
-	+ ', ' + '@description='		+ 'N''' + COALESCE(description, '') + ''''
+	+ ', ' + '@description='		+ 'N''' + REPLACE(COALESCE(description, ''),'''','''''') + ''''
 	+ ', ' + '@category_name='		+ 'N''' + CAST(sc.name AS NVARCHAR(MAX)) + ''''
 	+ ', ' + '@owner_login_name='		+ 'N''' + COALESCE(CAST(SUSER_SNAME(owner_sid) AS NVARCHAR(MAX)),'') + ''''
 	+ ';'
@@ -90,7 +90,7 @@ SELECT 'EXEC @ReturnCode = msdb.dbo.sp_add_jobstep '
 	+ ', ' + '@retry_interval='		+ CAST(retry_interval AS NVARCHAR(MAX))
 	+ ', ' + '@os_run_priority='		+ CAST(os_run_priority AS NVARCHAR(MAX))
 	+ ', ' + '@subsystem='			+ 'N''' + subsystem + ''''
-	+ ', ' + '@command='			+ 'N''' + COALESCE(command,'') + ''''
+	+ ', ' + '@command='			+ 'N''' + REPLACE(COALESCE(command,''),'''','''''') + ''''
 	+ ', ' + '@database_name='		+ 'N''' + COALESCE(database_name,'') + ''''
 	+ ', ' + '@output_file_name='		+ 'N''' + COALESCE(output_file_name,'') + ''''
 	+ ', ' + '@flags='			+ CAST(flags AS NVARCHAR(MAX))
