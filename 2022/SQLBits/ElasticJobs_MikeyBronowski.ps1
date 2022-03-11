@@ -14,25 +14,26 @@ Target group and members
 Elastic job
 
 
-
 #>
 cls
 
 ############# SETTINGS
     # AZ.SQL
     # Install-Module Az.Sql -MinimumVersion 3.7.1 -Force
-    # Import-Module Az.Sql -MinimumVersion 3.7.1
+    # Install-Module Az
+    # Import-Module dbatools, Az.Sql, Az
     # https://www.powershellgallery.com/packages/Az.Sql/3.7.1
     Get-Module dbatools, Az.Sql
     Set-Item Env:\SuppressAzurePowerShellBreakingChangeWarnings "true"
     
     # DBATOOLS
-    # Import-Module 'C:\Users\micha\OneDrive\learn\dbatools\dbatools.psd1' -Force
+    # Install-Module dbatools -Force
 
-    $azCredentials = (Get-Credential -UserName Mikey -Message "Password please")
 
 ############# CREATE
 $conn = Connect-AzAccount
+$azCredentials = (Get-Credential -UserName Mikey -Message "Password please")
+
 
 
 ###### RESOURCE GROUP
@@ -42,7 +43,6 @@ $conn = Connect-AzAccount
     }
 
     $resourceGroup = New-AzResourceGroup @resourceGroupArgs -Confirm:$false -Force
-    # $resourceGroup = Get-AzResourceGroup @resourceGroupArgs
 
 
 
@@ -122,7 +122,8 @@ $conn = Connect-AzAccount
 
 ###### ELASTIC JOB AGENT ~ 1 minute
     
-    $jobAgent = $jobDb | New-AzSqlElasticJobAgent -Name 'AZAgent'
+    $jobAgentName = 'AZAgent'
+    $jobAgent = $jobDb | New-AzSqlElasticJobAgent -Name $jobAgentName
 
 
 
@@ -157,12 +158,6 @@ $conn = Connect-AzAccount
 
     $jobCred = New-Object -TypeName "System.Management.Automation.PSCredential" -ArgumentList "job_credential", $loginPasswordSecure
     $jobCred = $jobAgent | New-AzSqlElasticJobCredential -Name "job_credential" -Credential $jobCred
-
-    <#
-    $refreshCred = $jobAgent | Get-AzSqlElasticJobCredential -Name refresh_credential
-    $jobCred = $jobAgent | Get-AzSqlElasticJobCredential -Name job_credential
-    #>
-
 
 
 ###### LOGIN/USER - target database with DBATOOLS.IO
@@ -322,9 +317,10 @@ $targetDatabases | % {
 
     $sqlText21 = "SELECT @@SERVERNAME AS [server], DB_NAME() AS [db], GETDATE() AS [when];"
 
-    #$job2 | Add-AzSqlElasticJobStep -Name "step1" -TargetGroupName $serverGroup1.TargetGroupName -CredentialName $jobCred.CredentialName -CommandText $sqlText21 -OutputSchemaName Collection -OutputTableName CentralOutput -OutputCredentialName $jobCred.CredentialName -OutputDatabaseResourceId '/subscriptions/a391f450-9ba5-4fce-aa21-97a1b9ec6937/resourceGroups/AzConf2021/providers/Microsoft.Sql/servers/az-job-server/databases/JobDb'  #-OutputDatabaseObject $jobDb
-    $job2 | Add-AzSqlElasticJobStep -Name "step1" -TargetGroupName $serverGroup1.TargetGroupName -CredentialName $jobCred.CredentialName -CommandText $sqlText21 -OutputSchemaName Collection -OutputTableName CentralOutput -OutputCredentialName 'job_collection' -OutputDatabaseResourceId '/subscriptions/a391f450-9ba5-4fce-aa21-97a1b9ec6937/resourceGroups/AzConf2021/providers/Microsoft.Sql/servers/az-job-server/databases/JobDb'  #-OutputDatabaseObject $jobDb
+    $job2 | Add-AzSqlElasticJobStep -Name "step1" -TargetGroupName $serverGroup1.TargetGroupName -CredentialName $jobCred.CredentialName -CommandText $sqlText21 -OutputSchemaName Collection -OutputTableName CentralOutput -OutputCredentialName 'job_collection' -OutputDatabaseResourceId $jobDb.ResourceId  #-OutputDatabaseObject $jobDb
 
+
+    ###### START / MONITOR ELASTIC JOB
     $jobExecution2 = $job2 | Start-AzSqlElasticJob
 
     $jobExecution2 | Get-AzSqlElasticJobTargetExecution -Count 13

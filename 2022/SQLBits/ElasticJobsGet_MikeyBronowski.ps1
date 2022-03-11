@@ -17,3 +17,12 @@ $firewallMyIpArgs = @{
 $firewallMyIp0 = New-AzSqlServerFirewallRule @firewallMyIpArgs -ServerName $server0Get.ServerName
 $firewallMyIp1 = New-AzSqlServerFirewallRule @firewallMyIpArgs -ServerName $server1Get.ServerName
 $firewallMyIp2 = New-AzSqlServerFirewallRule @firewallMyIpArgs -ServerName $server2Get.ServerName
+
+$jobAgentGet = Get-AzSqlElasticJobAgent -ResourceGroupName $resourceGroupGet.ResourceGroupName -ServerName $server0Get.ServerName -Name $jobAgentName
+
+$job2Get = Get-AzSqlElasticJob -ResourceGroupName $resourceGroupGet.ResourceGroupName -ServerName $server0Get.ServerName -AgentName $jobAgentGet.AgentName -Name $jobName2
+
+# $job2Get | Remove-AzSqlElasticJob -Force
+
+
+$job2Get | Get-AzSqlElasticJobStep
