@@ -1,0 +1,1 @@
+Tutaj znajda sie skrypty i prezentacja z warsztatu PowerDBA na SQLDay 2022
