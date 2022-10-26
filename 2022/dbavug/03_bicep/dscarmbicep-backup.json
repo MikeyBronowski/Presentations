@@ -1,0 +1,422 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "extensions_dscextension_modulesUrl": {
+      "type": "SecureString"
+    },
+    "extensions_dscextension_configurationFunction": {
+      "type": "SecureString"
+    },
+    "virtualMachines_bicepdemovm_name": {
+      "type": "String"
+    },
+    "virtualNetworks_bicepdemovnet_name": {
+      "type": "String"
+    },
+    "networkInterfaces_bicepdemonic_name": {
+      "type": "String"
+    },
+    "networkSecurityGroups_default_NSG_name": {
+      "type": "String"
+    },
+    "publicIPAddresses_bicepdemopublicip_name": {
+      "type": "String"
+    },
+    "storageAccounts_bootdiags7oipdca3yepgi_name": {
+      "type": "String"
+    }
+  },
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.Network/publicIPAddresses",
+      "apiVersion": "2022-01-01",
+      "name": "[parameters('publicIPAddresses_bicepdemopublicip_name')]",
+      "location": "uksouth",
+      "sku": {
+        "name": "Basic",
+        "tier": "Regional"
+      },
+      "properties": {
+        "ipAddress": "20.117.135.2",
+        "publicIPAddressVersion": "IPv4",
+        "publicIPAllocationMethod": "Dynamic",
+        "idleTimeoutInMinutes": 4,
+        "dnsSettings": {
+          "domainNameLabel": "bicepdemovm-7emmtvgkq553i",
+          "fqdn": "bicepdemovm-7emmtvgkq553i.uksouth.cloudapp.azure.com"
+        },
+        "ipTags": []
+      }
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2022-05-01",
+      "name": "[parameters('storageAccounts_bootdiags7oipdca3yepgi_name')]",
+      "location": "uksouth",
+      "sku": {
+        "name": "Standard_LRS",
+        "tier": "Standard"
+      },
+      "kind": "Storage",
+      "properties": {
+        "minimumTlsVersion": "TLS1_0",
+        "allowBlobPublicAccess": true,
+        "networkAcls": {
+          "bypass": "AzureServices",
+          "virtualNetworkRules": [],
+          "ipRules": [],
+          "defaultAction": "Allow"
+        },
+        "supportsHttpsTrafficOnly": true,
+        "encryption": {
+          "services": {
+            "file": {
+              "keyType": "Account",
+              "enabled": true
+            },
+            "blob": {
+              "keyType": "Account",
+              "enabled": true
+            }
+          },
+          "keySource": "Microsoft.Storage"
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "apiVersion": "2022-03-01",
+      "name": "[concat(parameters('virtualMachines_bicepdemovm_name'), '/dscextension')]",
+      "location": "uksouth",
+      "dependsOn": [
+        "[resourceId('Microsoft.Compute/virtualMachines', parameters('virtualMachines_bicepdemovm_name'))]"
+      ],
+      "properties": {
+        "autoUpgradeMinorVersion": true,
+        "publisher": "Microsoft.Powershell",
+        "type": "DSC",
+        "typeHandlerVersion": "2.9",
+        "settings": {
+          "modulesUrl": "[parameters('extensions_dscextension_modulesUrl')]",
+          "configurationFunction": "[parameters('extensions_dscextension_configurationFunction')]"
+        },
+        "protectedSettings": {}
+      }
+    },
+    {
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "apiVersion": "2022-01-01",
+      "name": "[parameters('networkSecurityGroups_default_NSG_name')]",
+      "location": "uksouth",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/networkSecurityGroups/securityRules', parameters('networkSecurityGroups_default_NSG_name'), 'default-allow-3389')]"
+      ],
+      "properties": {
+        "securityRules": [
+          {
+            "name": "default-allow-3389",
+            "id": "[resourceId('Microsoft.Network/networkSecurityGroups/securityRules', parameters('networkSecurityGroups_default_NSG_name'), 'default-allow-3389')]",
+            "type": "Microsoft.Network/networkSecurityGroups/securityRules",
+            "properties": {
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "3389",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 1000,
+              "direction": "Inbound",
+              "sourcePortRanges": [],
+              "destinationPortRanges": [],
+              "sourceAddressPrefixes": [],
+              "destinationAddressPrefixes": []
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Network/networkSecurityGroups/securityRules",
+      "apiVersion": "2022-01-01",
+      "name": "[concat(parameters('networkSecurityGroups_default_NSG_name'), '/default-allow-3389')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_default_NSG_name'))]"
+      ],
+      "properties": {
+        "protocol": "Tcp",
+        "sourcePortRange": "*",
+        "destinationPortRange": "3389",
+        "sourceAddressPrefix": "*",
+        "destinationAddressPrefix": "*",
+        "access": "Allow",
+        "priority": 1000,
+        "direction": "Inbound",
+        "sourcePortRanges": [],
+        "destinationPortRanges": [],
+        "sourceAddressPrefixes": [],
+        "destinationAddressPrefixes": []
+      }
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts/blobServices",
+      "apiVersion": "2022-05-01",
+      "name": "[concat(parameters('storageAccounts_bootdiags7oipdca3yepgi_name'), '/default')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_bootdiags7oipdca3yepgi_name'))]"
+      ],
+      "sku": {
+        "name": "Standard_LRS",
+        "tier": "Standard"
+      },
+      "properties": {
+        "cors": {
+          "corsRules": []
+        },
+        "deleteRetentionPolicy": {
+          "allowPermanentDelete": false,
+          "enabled": false
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts/fileServices",
+      "apiVersion": "2022-05-01",
+      "name": "[concat(parameters('storageAccounts_bootdiags7oipdca3yepgi_name'), '/default')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_bootdiags7oipdca3yepgi_name'))]"
+      ],
+      "sku": {
+        "name": "Standard_LRS",
+        "tier": "Standard"
+      },
+      "properties": {
+        "protocolSettings": {
+          "smb": {}
+        },
+        "cors": {
+          "corsRules": []
+        },
+        "shareDeleteRetentionPolicy": {
+          "enabled": true,
+          "days": 7
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts/queueServices",
+      "apiVersion": "2022-05-01",
+      "name": "[concat(parameters('storageAccounts_bootdiags7oipdca3yepgi_name'), '/default')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_bootdiags7oipdca3yepgi_name'))]"
+      ],
+      "properties": {
+        "cors": {
+          "corsRules": []
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts/tableServices",
+      "apiVersion": "2022-05-01",
+      "name": "[concat(parameters('storageAccounts_bootdiags7oipdca3yepgi_name'), '/default')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_bootdiags7oipdca3yepgi_name'))]"
+      ],
+      "properties": {
+        "cors": {
+          "corsRules": []
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Compute/virtualMachines",
+      "apiVersion": "2022-03-01",
+      "name": "[parameters('virtualMachines_bicepdemovm_name')]",
+      "location": "uksouth",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaces_bicepdemonic_name'))]",
+        "[resourceId('Microsoft.Storage/StorageAccounts', parameters('storageAccounts_bootdiags7oipdca3yepgi_name'))]"
+      ],
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "Standard_D2_v3"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "MicrosoftWindowsServer",
+            "offer": "WindowsServer",
+            "sku": "2019-Datacenter",
+            "version": "latest"
+          },
+          "osDisk": {
+            "osType": "Windows",
+            "name": "[concat(parameters('virtualMachines_bicepdemovm_name'), '_OsDisk_1_2b2acd968d9140788c7d026c6eda042f')]",
+            "createOption": "FromImage",
+            "caching": "ReadWrite",
+            "managedDisk": {
+              "storageAccountType": "StandardSSD_LRS",
+              "id": "[resourceId('Microsoft.Compute/disks', concat(parameters('virtualMachines_bicepdemovm_name'), '_OsDisk_1_2b2acd968d9140788c7d026c6eda042f'))]"
+            },
+            "deleteOption": "Detach",
+            "diskSizeGB": 127
+          },
+          "dataDisks": [
+            {
+              "lun": 0,
+              "name": "[concat(parameters('virtualMachines_bicepdemovm_name'), '_disk2_d7987348c89f476eaa2c719115eb7301')]",
+              "createOption": "Empty",
+              "caching": "None",
+              "managedDisk": {
+                "storageAccountType": "Standard_LRS",
+                "id": "[resourceId('Microsoft.Compute/disks', concat(parameters('virtualMachines_bicepdemovm_name'), '_disk2_d7987348c89f476eaa2c719115eb7301'))]"
+              },
+              "deleteOption": "Detach",
+              "diskSizeGB": 1023,
+              "toBeDetached": false
+            }
+          ]
+        },
+        "osProfile": {
+          "computerName": "[parameters('virtualMachines_bicepdemovm_name')]",
+          "adminUsername": "mikey",
+          "windowsConfiguration": {
+            "provisionVMAgent": true,
+            "enableAutomaticUpdates": true,
+            "patchSettings": {
+              "patchMode": "AutomaticByOS",
+              "assessmentMode": "ImageDefault"
+            }
+          },
+          "secrets": [],
+          "allowExtensionOperations": true,
+          "requireGuestProvisionSignal": true
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaces_bicepdemonic_name'))]"
+            }
+          ]
+        },
+        "diagnosticsProfile": {
+          "bootDiagnostics": {
+            "enabled": true,
+            "storageUri": "[concat('https://', parameters('storageAccounts_bootdiags7oipdca3yepgi_name'), '.blob.core.windows.net/')]"
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Network/networkInterfaces",
+      "apiVersion": "2022-01-01",
+      "name": "[parameters('networkInterfaces_bicepdemonic_name')]",
+      "location": "uksouth",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddresses_bicepdemopublicip_name'))]",
+        "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_bicepdemovnet_name'), 'Subnet')]"
+      ],
+      "kind": "Regular",
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "bicepdemoipconfig",
+            "id": "[concat(resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaces_bicepdemonic_name')), '/ipConfigurations/bicepdemoipconfig')]",
+            "etag": "W/\"ddadfe4a-1ea8-46d7-b4ae-d84e16eda49c\"",
+            "type": "Microsoft.Network/networkInterfaces/ipConfigurations",
+            "properties": {
+              "provisioningState": "Succeeded",
+              "privateIPAddress": "10.0.0.4",
+              "privateIPAllocationMethod": "Dynamic",
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddresses_bicepdemopublicip_name'))]"
+              },
+              "subnet": {
+                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_bicepdemovnet_name'), 'Subnet')]"
+              },
+              "primary": true,
+              "privateIPAddressVersion": "IPv4"
+            }
+          }
+        ],
+        "dnsSettings": {
+          "dnsServers": []
+        },
+        "enableAcceleratedNetworking": false,
+        "enableIPForwarding": false,
+        "nicType": "Standard"
+      }
+    },
+    {
+      "type": "Microsoft.Network/virtualNetworks",
+      "apiVersion": "2022-01-01",
+      "name": "[parameters('virtualNetworks_bicepdemovnet_name')]",
+      "location": "uksouth",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_bicepdemovnet_name'), 'Subnet')]",
+        "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_default_NSG_name'))]"
+      ],
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "10.0.0.0/16"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "Subnet",
+            "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_bicepdemovnet_name'), 'Subnet')]",
+            "properties": {
+              "addressPrefix": "10.0.0.0/24",
+              "networkSecurityGroup": {
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_default_NSG_name'))]"
+              },
+              "delegations": [],
+              "privateEndpointNetworkPolicies": "Disabled",
+              "privateLinkServiceNetworkPolicies": "Enabled"
+            },
+            "type": "Microsoft.Network/virtualNetworks/subnets"
+          }
+        ],
+        "virtualNetworkPeerings": [],
+        "enableDdosProtection": false
+      }
+    },
+    {
+      "type": "Microsoft.Network/virtualNetworks/subnets",
+      "apiVersion": "2022-01-01",
+      "name": "[concat(parameters('virtualNetworks_bicepdemovnet_name'), '/Subnet')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_bicepdemovnet_name'))]",
+        "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_default_NSG_name'))]"
+      ],
+      "properties": {
+        "addressPrefix": "10.0.0.0/24",
+        "networkSecurityGroup": {
+          "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_default_NSG_name'))]"
+        },
+        "delegations": [],
+        "privateEndpointNetworkPolicies": "Disabled",
+        "privateLinkServiceNetworkPolicies": "Enabled"
+      }
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+      "apiVersion": "2022-05-01",
+      "name": "[concat(parameters('storageAccounts_bootdiags7oipdca3yepgi_name'), '/default/bootdiagnostics-bicepdemo-11b37a15-553d-40d8-8872-b49824a4a26b')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts/blobServices', parameters('storageAccounts_bootdiags7oipdca3yepgi_name'), 'default')]",
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_bootdiags7oipdca3yepgi_name'))]"
+      ],
+      "properties": {
+        "immutableStorageWithVersioning": {
+          "enabled": false
+        },
+        "defaultEncryptionScope": "$account-encryption-key",
+        "denyEncryptionScopeOverride": false,
+        "publicAccess": "None"
+      }
+    }
+  ]
+}

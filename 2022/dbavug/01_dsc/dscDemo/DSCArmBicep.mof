@@ -1,0 +1,52 @@
+/*
+@TargetNode='DSCArmBicep'
+@GeneratedBy=Mikey
+@GenerationDate=10/26/2022 20:17:52
+@GenerationHost=FUFA
+*/
+
+instance of MSFT_FileDirectoryConfiguration as $MSFT_FileDirectoryConfiguration1ref
+{
+ModuleName = "PSDesiredStateConfiguration";
+ ResourceID = "[File]dscDemoDir";
+ Ensure = "Present";
+ SourceInfo = "C:\\Users\\micha\\OneDrive\\SQL\\Presentation\\DSCArmBicep\\dbavug\\01_dsc\\dsc_config.ps1::9::9::file";
+ Type = "Directory";
+ DestinationPath = "C:\\dscDemoDir\\";
+
+ModuleVersion = "1.0";
+ ConfigurationName = "dscDemo";
+};
+instance of MSFT_FileDirectoryConfiguration as $MSFT_FileDirectoryConfiguration2ref
+{
+ModuleName = "PSDesiredStateConfiguration";
+ ResourceID = "[File]dscDemoFile";
+ Ensure = "Present";
+ SourceInfo = "C:\\Users\\micha\\OneDrive\\SQL\\Presentation\\DSCArmBicep\\dbavug\\01_dsc\\dsc_config.ps1::15::9::file";
+ Type = "File";
+ DestinationPath = "C:\\dscDemoDir\\dscDemoFile2.txt";
+ Contents = "This is a text in dscDemoFile file in dscDemoDir folder on localhost";
+
+ModuleVersion = "1.0";
+DependsOn = {
+    "[File]dscDemoDir"};
+ ConfigurationName = "dscDemo";
+};
+instance of OMI_ConfigurationDocument
+
+                    {
+ Version="2.0.0";
+
+                        MinimumCompatibleVersion = "1.0.0";
+
+                        CompatibleVersionAdditionalProperties= {"Omi_BaseResource:ConfigurationName"};
+
+                        Author="Mikey";
+
+                        GenerationDate="10/26/2022 20:17:52";
+
+                        GenerationHost="FUFA";
+
+                        Name="dscDemo";
+
+                    };
