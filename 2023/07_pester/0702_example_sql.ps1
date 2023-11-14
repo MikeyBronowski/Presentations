@@ -1,0 +1,61 @@
+<#
+
+  _____         _____ _____    _____ _    _ __  __ __  __ _____ _______   ___   ___ ___  _  _   
+ |  __ \ /\    / ____/ ____|  / ____| |  | |  \/  |  \/  |_   _|__   __| |__ \ / _ \__ \| || |  
+ | |__) /  \  | (___| (___   | (___ | |  | | \  / | \  / | | |    | |       ) | | | | ) | || |_ 
+ |  ___/ /\ \  \___ \\___ \   \___ \| |  | | |\/| | |\/| | | |    | |      / /| | | |/ /|__   _|
+ | |  / ____ \ ____) |___) |  ____) | |__| | |  | | |  | |_| |_   | |     / /_| |_| / /_   | |  
+ |_| /_/    \_\_____/_____/  |_____/ \____/|_|  |_|_|  |_|_____|  |_|    |____|\___/____|  |_|    
+ 
+                           
+                                                                                        
+
+8888888b.                    888                     
+888   Y88b                   888                     
+888    888                   888                     
+888   d88P  .d88b.  .d8888b  888888  .d88b.  888d888 
+8888888P"  d8P  Y8b 88K      888    d8P  Y8b 888P"   
+888        88888888 "Y8888b. 888    88888888 888     
+888        Y8b.          X88 Y88b.  Y8b.     888     
+888         "Y8888   88888P'  "Y888  "Y8888  888     
+                                                     
+                                                     
+                                                     
+                                                                                             
+                                                                                               
+@MikeyBronowski                                                                                           
+
+#> 
+
+
+$pester  = Invoke-Pester .\pester.tests.ps1 -Output None -PassThru
+$pesterResults = Invoke-Pester -Path pester.tests.ps1 -Output Detailed
+$pesterResults.Failed
+$pesterResults.PassedCount
+
+
+$configuration.Filter.Tag
+
+
+Invoke-Pester .\0702_example_sql.tests.ps1 -Tag Instance -ExcludeTag agent,tempdb
+
+
+#######################################
+$options = @{
+    Filter = @{
+
+        Tag = "tempdb","agent"
+    }
+
+    Output = @{
+
+        Verbosity = "Detailed"
+    }
+    
+}
+
+$config = New-PesterConfiguration -Hashtable $options
+
+Invoke-Pester -Configuration $config 
+
+#######################################

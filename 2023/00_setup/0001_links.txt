@@ -1,0 +1,17 @@
+http://www.patorjk.com/software/taag/#p=display&h=0&v=3&f=Colossal&t=SQLDay2022%0A%0A
+
+Set-PoshPrompt -Theme montys     
+
+
+
+https://jeffbrown.tech/getting-started-with-pester-testing-in-powershell/
+
+
+# https://nocolumnname.blog/tag/convertfrom-exceltosqlinsert/
+
+https://adamtheautomator.com/html-report/
+
+
+
+Save-Module -Name dbatools, dbachecks, importexcel, pester -Repository PSGallery -Path C:\LabSources\Tools\PSModulesDL
+Save-Module -Name oh-my-posh , AutomatedLab -Repository PSGallery -Path C:\LabSources\Tools\PSModulesDL      

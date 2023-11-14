@@ -1,0 +1,33 @@
+update
+- PowerShell
+- VSCode
+- AutomatedLab
+- AutomatedLab.Recipe
+- AutomatedLabCore
+- chocolatey
+- winget
+- dbatools
+- dbachecks
+
+
+sources
+https://my.visualstudio.com/Downloads?q=SQL%20Server%202022%20Developer%20Edition
+- windows server
+- windows 11
+- sql server
+
+
+
+testing
+- start with OS only, check if that works
+- carry on with the tools
+- last step get SQL Server installed
+
+
+
+PowerDBASlido
+
+- What version Pester?
+- What version PowerShell?
+- Chocolatey?
+- ImportExcel
